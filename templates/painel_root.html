@@ -1,0 +1,276 @@
+
+<!doctype html>
+<html lang="pt-BR">
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <title>Portal RH | Administração</title>
+
+    <style>
+        :root {
+            font-family: Inter, system-ui, Arial, sans-serif;
+            color: #15283f;
+        }
+
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            margin: 0;
+            background: #f2f5fa;
+        }
+
+        .topbar {
+            background: #fff;
+            border-bottom: 1px solid #e2e8f0;
+            padding: 18px 5%;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 16px;
+        }
+
+        .brand {
+            font-size: 21px;
+            font-weight: 800;
+            color: #123c70;
+        }
+
+        .brand span {
+            color: #64748b;
+            font-size: 13px;
+            font-weight: 400;
+            display: block;
+            margin-top: 4px;
+        }
+
+        .container {
+            max-width: 1100px;
+            margin: 45px auto;
+            padding: 0 20px;
+        }
+
+        .welcome {
+            margin-bottom: 32px;
+        }
+
+        h1 {
+            font-size: 29px;
+            margin: 0 0 10px;
+        }
+
+        h2 {
+            font-size: 19px;
+            margin: 0 0 20px;
+        }
+
+        p {
+            color: #64748b;
+            line-height: 1.6;
+        }
+
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 20px;
+        }
+
+        .card {
+            background: #fff;
+            border: 1px solid #e2e8f0;
+            border-radius: 16px;
+            padding: 28px;
+            box-shadow: 0 6px 20px #12304b08;
+        }
+
+        .icon {
+            font-size: 32px;
+            margin-bottom: 18px;
+        }
+
+        .card h3 {
+            margin: 0;
+            font-size: 20px;
+        }
+
+        .card p {
+            min-height: 55px;
+        }
+
+        .btn {
+            display: inline-block;
+            background: #1455a0;
+            color: white;
+            padding: 13px 20px;
+            border-radius: 9px;
+            text-decoration: none;
+            font-weight: 650;
+            border: 0;
+            cursor: pointer;
+            font-size: 14px;
+            transition: background 0.2s;
+        }
+
+        .btn:hover {
+            background: #0d407e;
+        }
+
+        .secondary {
+            background: #eaf2fc;
+            color: #1455a0;
+        }
+
+        .secondary:hover {
+            background: #dceafb;
+        }
+
+        .management {
+            margin-top: 22px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 20px;
+        }
+
+        .management p {
+            margin-bottom: 0;
+        }
+
+        .logout {
+            background: #eef2f6;
+            color: #475569;
+        }
+
+        .logout:hover {
+            background: #e2e8f0;
+        }
+
+        @media (max-width: 650px) {
+            .grid {
+                grid-template-columns: 1fr;
+            }
+
+            .management {
+                flex-direction: column;
+                align-items: start;
+            }
+
+            .topbar {
+                flex-wrap: wrap;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+    <!-- CABEÇALHO -->
+    <header class="topbar">
+
+        <div class="brand">
+            Portal RH
+            <span>Central de relatórios e administração</span>
+        </div>
+
+        <form
+            action="{{ url_for('auth.logout') }}"
+            method="post"
+        >
+            <button
+                class="btn logout"
+                type="submit"
+            >
+                Sair
+            </button>
+        </form>
+
+    </header>
+
+    <!-- CONTEÚDO PRINCIPAL -->
+    <main class="container">
+
+        <section class="welcome">
+            <h1>Olá, {{ usuario.nome }}!</h1>
+
+            <p>
+                Bem-vindo ao Painel ROOT.
+                Gerencie os módulos e relatórios do portal.
+            </p>
+        </section>
+
+        <h2>Módulos disponíveis</h2>
+
+        <section class="grid">
+
+            <!-- CONTRATOS DETERMINADOS -->
+            <article class="card">
+
+                <div class="icon">📄</div>
+
+                <h3>Contratos Determinados</h3>
+
+                <p>
+                    Consulte contratos, acompanhe vencimentos
+                    e exporte relatórios.
+                </p>
+
+                <a
+                    class="btn"
+                    href="{{ url_for('contratos.index') }}"
+                >
+                    Acessar contratos
+                </a>
+
+            </article>
+
+            <!-- GESTANTES -->
+            <article class="card">
+
+                <div class="icon">📋</div>
+
+                <h3>Gestantes</h3>
+
+                <p>
+                    Consulte registros e exporte informações
+                    para Excel ou CSV.
+                </p>
+
+                <a
+                    class="btn"
+                    href="{{ url_for('gestantes.index') }}"
+                >
+                    Acessar gestantes
+                </a>
+
+            </article>
+
+        </section>
+
+        <!-- GERENCIAMENTO DE USUÁRIOS -->
+        <section class="card management">
+
+            <div>
+                <h2>Gerenciamento de usuários</h2>
+
+                <p>
+                    Cadastre usuários, defina senhas
+                    e controle o acesso aos módulos.
+                </p>
+            </div>
+
+            <a
+                class="btn secondary"
+                href="{{ url_for('admin.index') }}"
+            >
+                Gerenciar usuários
+            </a>
+
+        </section>
+
+    </main>
+
+</body>
+</html>

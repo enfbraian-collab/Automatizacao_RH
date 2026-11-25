@@ -1,0 +1,403 @@
+
+<!doctype html>
+<html lang="pt-BR">
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <title>Portal de Extração de Contratos</title>
+
+    <style>
+        :root {
+            font-family: Inter, system-ui, Arial;
+            color: #15283f;
+        }
+
+        body {
+            background: #f2f5fa;
+            margin: 0;
+        }
+
+        .wrap {
+            max-width: 1000px;
+            margin: 48px auto;
+            padding: 0 20px;
+        }
+
+        .panel {
+            background: white;
+            border: 1px solid #e2e8f0;
+            border-radius: 18px;
+            padding: 28px;
+            box-shadow: 0 8px 28px #12304b0a;
+        }
+
+        header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 15px;
+        }
+
+        h1 {
+            font-size: 25px;
+            margin: 0;
+        }
+
+        p {
+            color: #60738b;
+        }
+
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 18px;
+            margin: 26px 0;
+        }
+
+        label {
+            display: block;
+            font-weight: 600;
+            margin-bottom: 8px;
+        }
+
+        input,
+        select {
+            box-sizing: border-box;
+            width: 100%;
+            padding: 13px;
+            border: 1px solid #cbd5e1;
+            border-radius: 9px;
+            background: white;
+            font: inherit;
+        }
+
+        .actions {
+            display: flex;
+            gap: 12px;
+            flex-wrap: wrap;
+        }
+
+        button {
+            background: #1455a0;
+            color: white;
+            padding: 13px 19px;
+            border: 0;
+            border-radius: 9px;
+            font-weight: 650;
+            cursor: pointer;
+        }
+
+        .secondary {
+            background: #eaf2fc;
+            color: #1455a0;
+        }
+
+        .small {
+            font-size: 12px;
+            color: #718096;
+        }
+
+        #message {
+            margin-top: 15px;
+        }
+
+        table {
+            border-collapse: collapse;
+            width: 100%;
+            font-size: 13px;
+        }
+
+        td,
+        th {
+            border-bottom: 1px solid #e5eaf0;
+            padding: 10px;
+            text-align: left;
+            white-space: nowrap;
+        }
+
+        .scroll {
+            overflow: auto;
+            max-height: 360px;
+            margin-top: 20px;
+        }
+
+        .header-actions {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+
+        .back-link {
+            padding: 12px 16px;
+            border-radius: 9px;
+            background: #eaf2fc;
+            color: #1455a0;
+            text-decoration: none;
+            font-size: 13px;
+            font-weight: 650;
+        }
+
+        form.logout {
+            margin: 0;
+        }
+
+        .logout button {
+            background: #eef2f6;
+            color: #475569;
+        }
+
+        @media(max-width:600px) {
+            .grid {
+                grid-template-columns: 1fr;
+            }
+
+            header {
+                align-items: start;
+                flex-direction: column;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="wrap">
+        <div class="panel">
+
+            <header>
+
+                <div>
+                    <h1>▣ Portal de Extração de Contratos</h1>
+                    <p>Consulta e exportação de dados de contratos</p>
+                </div>
+
+                <div class="header-actions">
+
+                    {% if session.get("is_root") %}
+                    <a
+                        class="back-link"
+                        href="{{ url_for('auth.painel') }}"
+                    >
+                        ← Painel ROOT
+                    </a>
+                    {% endif %}
+
+                    <form
+                        class="logout"
+                        method="post"
+                        action="{{ url_for('auth.logout') }}"
+                    >
+                        <button type="submit">Sair</button>
+                    </form>
+
+                </div>
+
+            </header>
+
+            <form id="filters">
+
+                <div class="grid">
+
+                    <div>
+                        <label for="inicio">Data inicial</label>
+                        <input
+                            type="date"
+                            name="inicio"
+                            id="inicio"
+                            required
+                        >
+                    </div>
+
+                    <div>
+                        <label for="fim">Data final</label>
+                        <input
+                            type="date"
+                            name="fim"
+                            id="fim"
+                            required
+                        >
+                    </div>
+
+                    <div>
+                        <label for="status">
+                            Status de vencimento
+                        </label>
+
+                        <select name="status" id="status">
+                            <option value="">
+                                Todos os contratos
+                            </option>
+
+                            {% for status in statuses %}
+                            <option value="{{ status }}">
+                                {{ status }}
+                            </option>
+                            {% endfor %}
+                        </select>
+                    </div>
+
+                    <div>
+                        <label for="formato">
+                            Formato do arquivo
+                        </label>
+
+                        <select id="formato" name="formato">
+                            <option value="xlsx">
+                                Excel (.xlsx)
+                            </option>
+
+                            <option value="csv">
+                                CSV (.csv)
+                            </option>
+                        </select>
+                    </div>
+
+                </div>
+
+                <p class="small">
+                    O período considera a coluna
+                    {{ date_column }}
+                    (inclusive nas duas datas).
+                </p>
+
+                <div class="actions">
+
+                    <button
+                        type="button"
+                        class="secondary"
+                        onclick="consultar()"
+                    >
+                        Consultar registros
+                    </button>
+
+                    <button
+                        type="button"
+                        onclick="exportar()"
+                    >
+                        ↓ Baixar relatório
+                    </button>
+
+                </div>
+
+            </form>
+
+            <p id="message" role="status"></p>
+
+            <div class="scroll" id="preview"></div>
+
+        </div>
+    </div>
+
+    <script>
+
+        // Rotas geradas automaticamente pelo Flask
+        const URL_CONSULTAR = {{ url_for('contratos.consultar') | tojson }};
+        const URL_EXPORTAR = {{ url_for('contratos.exportar') | tojson }};
+
+        const form = document.getElementById('filters');
+        const msg = document.getElementById('message');
+
+        function params() {
+
+            if (!form.reportValidity()) {
+                return null;
+            }
+
+            return new URLSearchParams(
+                new FormData(form)
+            );
+        }
+
+        async function consultar() {
+
+            const p = params();
+
+            if (!p) return;
+
+            msg.textContent = 'Consultando...';
+
+            try {
+
+                const res = await fetch(
+                    URL_CONSULTAR + '?' + p.toString()
+                );
+
+                if (!res.ok) {
+                    throw new Error(await res.text());
+                }
+
+                const json = await res.json();
+
+                // O Flask já retorna uma lista de registros
+                const rows = json.registros;
+
+                msg.textContent =
+                    `Exibindo ${rows.length} registro(s) ` +
+                    `(prévia limitada a 100).`;
+
+                const area = document.getElementById('preview');
+
+                area.replaceChildren();
+
+                if (!rows.length) return;
+
+                const table = document.createElement('table');
+
+                const tr = document.createElement('tr');
+
+                for (const col of json.colunas) {
+
+                    const th = document.createElement('th');
+
+                    th.textContent = col;
+
+                    tr.appendChild(th);
+                }
+
+                table.appendChild(tr);
+
+                for (const row of rows) {
+
+                    const r = document.createElement('tr');
+
+                    for (const col of json.colunas) {
+
+                        const td = document.createElement('td');
+
+                        td.textContent = row[col] ?? '';
+
+                        r.appendChild(td);
+                    }
+
+                    table.appendChild(r);
+                }
+
+                area.appendChild(table);
+
+            } catch (e) {
+
+                msg.textContent =
+                    'Erro ao consultar: ' + e.message;
+            }
+        }
+
+        function exportar() {
+
+            const p = params();
+
+            if (!p) return;
+
+            window.location.href =
+                URL_EXPORTAR + '?' + p.toString();
+
+            msg.textContent =
+                'Preparando o download...';
+        }
+
+    </script>
+
+</body>
+</html>

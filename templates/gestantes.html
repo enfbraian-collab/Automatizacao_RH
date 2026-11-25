@@ -1,0 +1,122 @@
+
+<!doctype html>
+<html lang="pt-BR">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width,initial-scale=1">
+    <title>Portal RH | Gestantes</title>
+    <style>
+        :root{font-family:Inter,system-ui,Arial;color:#15283f}
+        body{background:#f2f5fa;margin:0}
+        .wrap{max-width:1050px;margin:48px auto;padding:0 20px}
+        .panel{background:white;border:1px solid #e2e8f0;border-radius:18px;padding:30px;box-shadow:0 8px 28px #12304b0a}
+        header{display:flex;justify-content:space-between;align-items:center;gap:15px;flex-wrap:wrap}
+        h1{font-size:25px;margin:0}
+        p{color:#64748b}
+        .actions{display:flex;gap:12px;flex-wrap:wrap;margin-top:25px}
+        button,.back{background:#1455a0;color:white;padding:13px 19px;border:0;border-radius:9px;font-weight:650;cursor:pointer;text-decoration:none;font-size:14px}
+        .secondary{background:#eaf2fc;color:#1455a0}
+        select{padding:12px;border:1px solid #cbd5e1;border-radius:9px;font:inherit}
+        .scroll{overflow:auto;max-height:450px;margin-top:25px}
+        table{border-collapse:collapse;width:100%;font-size:13px}
+        td,th{padding:11px;border-bottom:1px solid #e2e8f0;text-align:left;white-space:nowrap}
+        #message{margin-top:20px}
+    </style>
+</head>
+<body>
+<div class="wrap">
+    <div class="panel">
+        <header>
+            <div>
+                <h1>Gestantes</h1>
+                <p>Consulta e exportação de registros</p>
+            </div>
+            {% if session.get("is_root") %}
+            <a class="back secondary" href="{{ url_for('auth.painel') }}">
+                ← Painel ROOT
+            </a>
+            {% endif %}
+        </header>
+
+        <div class="actions">
+            <button type="button" class="secondary" onclick="consultar()">
+                Consultar registros
+            </button>
+
+            <select id="formato">
+                <option value="xlsx">Excel (.xlsx)</option>
+                <option value="csv">CSV (.csv)</option>
+            </select>
+
+            <button type="button" onclick="exportar()">
+                ↓ Baixar relatório
+            </button>
+        </div>
+
+        <p id="message" role="status"></p>
+        <div id="preview" class="scroll"></div>
+    </div>
+</div>
+
+<script>
+const URL_CONSULTAR = {{ url_for('gestantes.consultar') | tojson }};
+const URL_EXPORTAR = {{ url_for('gestantes.exportar') | tojson }};
+
+const msg = document.getElementById("message");
+const area = document.getElementById("preview");
+
+async function consultar() {
+    msg.textContent = "Consultando registros...";
+
+    try {
+        const resposta = await fetch(URL_CONSULTAR);
+
+        if (!resposta.ok) {
+            throw new Error("Não foi possível consultar os dados.");
+        }
+
+        const dados = await resposta.json();
+
+        msg.textContent =
+            `Exibindo ${dados.total_exibido} registro(s). Prévia limitada a 100.`;
+
+        area.replaceChildren();
+
+        const tabela = document.createElement("table");
+        const cabecalho = document.createElement("tr");
+
+        for (const coluna of dados.colunas) {
+            const th = document.createElement("th");
+            th.textContent = coluna;
+            cabecalho.appendChild(th);
+        }
+
+        tabela.appendChild(cabecalho);
+
+        for (const registro of dados.registros) {
+            const linha = document.createElement("tr");
+
+            for (const coluna of dados.colunas) {
+                const td = document.createElement("td");
+                td.textContent = registro[coluna] ?? "";
+                linha.appendChild(td);
+            }
+
+            tabela.appendChild(linha);
+        }
+
+        area.appendChild(tabela);
+
+    } catch (erro) {
+        msg.textContent = erro.message;
+    }
+}
+
+function exportar() {
+    const formato = document.getElementById("formato").value;
+    window.location.href =
+        URL_EXPORTAR + "?formato=" + encodeURIComponent(formato);
+}
+</script>
+</body>
+</html>

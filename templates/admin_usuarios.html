@@ -1,0 +1,573 @@
+
+<!doctype html>
+<html lang="pt-BR">
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Portal RH | Usuários</title>
+
+    <style>
+        :root {
+            font-family: Inter, system-ui, Arial, sans-serif;
+            color: #15283f;
+        }
+
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            margin: 0;
+            background: #f2f5fa;
+        }
+
+        .topbar {
+            background: #fff;
+            border-bottom: 1px solid #e2e8f0;
+            padding: 20px 5%;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 16px;
+        }
+
+        .container {
+            max-width: 1150px;
+            margin: 35px auto;
+            padding: 0 20px;
+        }
+
+        h1 {
+            font-size: 28px;
+            margin: 0 0 8px;
+        }
+
+        h2 {
+            font-size: 20px;
+            margin: 0 0 20px;
+        }
+
+        h3 {
+            font-size: 17px;
+        }
+
+        p {
+            color: #64748b;
+            line-height: 1.5;
+        }
+
+        .card {
+            background: #fff;
+            border: 1px solid #e2e8f0;
+            border-radius: 16px;
+            padding: 26px;
+            margin-bottom: 22px;
+            box-shadow: 0 6px 20px #12304b08;
+        }
+
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 18px;
+        }
+
+        label {
+            font-weight: 600;
+            font-size: 14px;
+            display: block;
+            margin-bottom: 7px;
+        }
+
+        input[type="text"],
+        input[type="password"] {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid #cbd5e1;
+            border-radius: 9px;
+            font: inherit;
+        }
+
+        input:focus {
+            outline: 2px solid #bfdbfe;
+            border-color: #1455a0;
+        }
+
+        button,
+        .btn {
+            background: #1455a0;
+            color: #fff;
+            border: 0;
+            border-radius: 9px;
+            padding: 12px 18px;
+            font-weight: 650;
+            cursor: pointer;
+            text-decoration: none;
+            display: inline-block;
+            font-size: 14px;
+        }
+
+        button:hover,
+        .btn:hover {
+            opacity: 0.9;
+        }
+
+        .secondary {
+            background: #eaf2fc;
+            color: #1455a0;
+        }
+
+        .danger {
+            background: #fee2e2;
+            color: #991b1b;
+        }
+
+        .actions {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+            align-items: center;
+        }
+
+        .permissions {
+            display: flex;
+            gap: 25px;
+            flex-wrap: wrap;
+            margin: 12px 0;
+        }
+
+        .check {
+            display: flex;
+            align-items: center;
+            gap: 7px;
+            font-weight: 400;
+            cursor: pointer;
+        }
+
+        .check input {
+            width: 17px;
+            height: 17px;
+            accent-color: #1455a0;
+        }
+
+        .user {
+            border: 1px solid #e2e8f0;
+            border-radius: 12px;
+            padding: 20px;
+            margin-top: 16px;
+        }
+
+        .userhead {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .userhead p {
+            margin: 7px 0;
+        }
+
+        .badge {
+            font-size: 12px;
+            padding: 6px 10px;
+            border-radius: 20px;
+            background: #dcfce7;
+            color: #166534;
+            white-space: nowrap;
+        }
+
+        .inactive {
+            background: #fee2e2;
+            color: #991b1b;
+        }
+
+        .flash {
+            padding: 14px;
+            border-radius: 9px;
+            margin: 16px 0;
+            background: #e0f2fe;
+            color: #075985;
+        }
+
+        .flash.erro {
+            background: #fee2e2;
+            color: #991b1b;
+        }
+
+        .flash.sucesso {
+            background: #dcfce7;
+            color: #166534;
+        }
+
+        .row {
+            display: flex;
+            gap: 12px;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+
+        hr {
+            border: 0;
+            border-top: 1px solid #e2e8f0;
+            margin: 20px 0;
+        }
+
+        @media (max-width: 650px) {
+            .grid {
+                grid-template-columns: 1fr;
+            }
+
+            .userhead,
+            .topbar {
+                flex-wrap: wrap;
+            }
+
+            .container {
+                padding: 0 12px;
+            }
+
+            .card {
+                padding: 20px;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+    <!-- CABEÇALHO -->
+    <header class="topbar">
+
+        <strong>Portal RH · Administração</strong>
+
+        <a
+            class="btn secondary"
+            href="{{ url_for('auth.painel') }}"
+        >
+            ← Painel ROOT
+        </a>
+
+    </header>
+
+    <main class="container">
+
+        <h1>Gerenciamento de usuários</h1>
+
+        <p>
+            Cadastre colaboradores e controle
+            os módulos autorizados.
+        </p>
+
+        <!-- MENSAGENS -->
+        {% with mensagens = get_flashed_messages(with_categories=true) %}
+
+            {% for categoria, mensagem in mensagens %}
+                <div class="flash {{ categoria }}" role="status">
+                    {{ mensagem }}
+                </div>
+            {% endfor %}
+
+        {% endwith %}
+
+        <!-- CADASTRO -->
+        <section class="card">
+
+            <h2>Cadastrar novo usuário</h2>
+
+            <form
+                method="post"
+                action="{{ url_for('admin.criar') }}"
+            >
+
+                <input
+                    type="hidden"
+                    name="csrf_token"
+                    value="{{ csrf_token }}"
+                >
+
+                <div class="grid">
+
+                    <div>
+                        <label for="nome">
+                            Nome completo
+                        </label>
+
+                        <input
+                            id="nome"
+                            type="text"
+                            name="nome"
+                            required
+                            maxlength="150"
+                        >
+                    </div>
+
+                    <div>
+                        <label for="username">
+                            Login
+                        </label>
+
+                        <input
+                            id="username"
+                            type="text"
+                            name="username"
+                            required
+                            maxlength="100"
+                            autocomplete="off"
+                        >
+                    </div>
+
+                    <div>
+                        <label for="senha">
+                            Senha inicial
+                        </label>
+
+                        <input
+                            id="senha"
+                            type="password"
+                            name="senha"
+                            required
+                            minlength="7"
+                            autocomplete="new-password"
+                            placeholder="Mínimo de 7 caracteres"
+                        >
+                    </div>
+
+                </div>
+
+                <hr>
+
+                <h3>Contratos Determinados</h3>
+
+                <div class="permissions">
+
+                    <label class="check">
+                        <input
+                            type="checkbox"
+                            name="contratos_visualizar"
+                        >
+                        Consultar
+                    </label>
+
+                    <label class="check">
+                        <input
+                            type="checkbox"
+                            name="contratos_exportar"
+                        >
+                        Exportar Excel/CSV
+                    </label>
+
+                </div>
+
+                <h3>Gestantes</h3>
+
+                <div class="permissions">
+
+                    <label class="check">
+                        <input
+                            type="checkbox"
+                            name="gestantes_visualizar"
+                        >
+                        Consultar
+                    </label>
+
+                    <label class="check">
+                        <input
+                            type="checkbox"
+                            name="gestantes_exportar"
+                        >
+                        Exportar Excel/CSV
+                    </label>
+
+                </div>
+
+                <button type="submit">
+                    Cadastrar usuário
+                </button>
+
+            </form>
+
+        </section>
+
+        <!-- USUÁRIOS CADASTRADOS -->
+        <section class="card">
+
+            <h2>Usuários cadastrados</h2>
+
+            {% for usuario in usuarios %}
+
+                <div class="user">
+
+                    <div class="userhead">
+
+                        <div>
+                            <strong>
+                                {{ usuario.nome }}
+                            </strong>
+
+                            <p>
+                                Login: {{ usuario.username }}
+                            </p>
+                        </div>
+
+                        <span
+                            class="badge {% if not usuario.ativo %}inactive{% endif %}"
+                        >
+                            {{ "Ativo" if usuario.ativo else "Bloqueado" }}
+                        </span>
+
+                    </div>
+
+                    {% if usuario.is_root %}
+
+                        <p>
+                            Administrador ROOT — acesso administrativo.
+                        </p>
+
+                    {% else %}
+
+                        <!-- PERMISSÕES -->
+                        <form
+                            method="post"
+                            action="{{ url_for('admin.atualizar_permissoes', usuario_id=usuario.id) }}"
+                        >
+
+                            <input
+                                type="hidden"
+                                name="csrf_token"
+                                value="{{ csrf_token }}"
+                            >
+
+                            {% for modulo in ['contratos', 'gestantes'] %}
+
+                                {% set acesso = permissoes.get(usuario.id, {}).get(modulo, {}) %}
+
+                                <h3>
+                                    {{ 'Contratos Determinados' if modulo == 'contratos' else 'Gestantes' }}
+                                </h3>
+
+                                <div class="permissions">
+
+                                    <label class="check">
+
+                                        <input
+                                            type="checkbox"
+                                            name="{{ modulo }}_visualizar"
+                                            {% if acesso.get('visualizar') %}checked{% endif %}
+                                        >
+
+                                        Consultar
+
+                                    </label>
+
+                                    <label class="check">
+
+                                        <input
+                                            type="checkbox"
+                                            name="{{ modulo }}_exportar"
+                                            {% if acesso.get('exportar') %}checked{% endif %}
+                                        >
+
+                                        Exportar
+
+                                    </label>
+
+                                </div>
+
+                            {% endfor %}
+
+                            <button
+                                type="submit"
+                                class="secondary"
+                            >
+                                Salvar permissões
+                            </button>
+
+                        </form>
+
+                        <hr>
+
+                        <!-- BLOQUEIO -->
+                        <div class="actions">
+
+                            <form
+                                method="post"
+                                action="{{ url_for('admin.alterar_status', usuario_id=usuario.id) }}"
+                            >
+
+                                <input
+                                    type="hidden"
+                                    name="csrf_token"
+                                    value="{{ csrf_token }}"
+                                >
+
+                                <button
+                                    type="submit"
+                                    class="{{ 'secondary' if not usuario.ativo else 'danger' }}"
+                                >
+                                    {{ 'Desbloquear' if not usuario.ativo else 'Bloquear' }}
+                                </button>
+
+                            </form>
+
+                        </div>
+
+                        <!-- REDEFINIÇÃO DE SENHA -->
+                        <form
+                            method="post"
+                            action="{{ url_for('admin.redefinir_senha', usuario_id=usuario.id) }}"
+                            style="margin-top:18px"
+                        >
+
+                            <input
+                                type="hidden"
+                                name="csrf_token"
+                                value="{{ csrf_token }}"
+                            >
+
+                            <label for="nova_senha_{{ usuario.id }}">
+                                Redefinir senha
+                            </label>
+
+                            <div class="row">
+
+                                <input
+                                    id="nova_senha_{{ usuario.id }}"
+                                    type="password"
+                                    name="senha"
+                                    minlength="7"
+                                    required
+                                    autocomplete="new-password"
+                                    placeholder="Nova senha (mínimo 7 caracteres)"
+                                    style="max-width:330px"
+                                >
+
+                                <button
+                                    type="submit"
+                                    class="secondary"
+                                >
+                                    Atualizar senha
+                                </button>
+
+                            </div>
+
+                        </form>
+
+                    {% endif %}
+
+                </div>
+
+            {% else %}
+
+                <p>
+                    Nenhum usuário cadastrado.
+                </p>
+
+            {% endfor %}
+
+        </section>
+
+    </main>
+
+</body>
+</html>
