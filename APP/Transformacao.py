@@ -191,7 +191,7 @@ salva_df_local(df, "Automatizacao_Lidi.csv", caminho=r"C:\Users\braian.lourenco\
 con_postgres = SupabaseConnector()
 con_postgres._create_engine()
 con_postgres.load_dataframe(df, "Automatizacao_Lidi")
-con_postgres.fechar_conexao()
+# Conexão mantida para carregar Gestantes.
 
 #Carregar os dados da tabela Gestantes no banco PostgreSQL
 con_postgres.load_dataframe(dfg, "Gestantes")

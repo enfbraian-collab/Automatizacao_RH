@@ -1,6 +1,8 @@
 
 import io
 import json
+from flask import current_app
+from services.etl import executar_etl_contratos, ETLJaEmExecucao
 
 from flask import (
     Blueprint,
@@ -125,3 +127,40 @@ def exportar():
         as_attachment=True,
         download_name=f"gestantes.{formato}"
     )
+
+
+# =====================================================
+# ATUALIZAR DADOS DE GESTANTES
+# =====================================================
+
+@gestantes_bp.post("/atualizar-dados")
+def atualizar_dados():
+
+    bloqueio = verificar_acesso("visualizar")
+
+    if bloqueio is not None:
+        return bloqueio
+
+    try:
+        executar_etl_contratos()
+
+        return jsonify({
+            "sucesso": True,
+            "mensagem": "Dados atualizados com sucesso."
+        })
+
+    except ETLJaEmExecucao:
+        return jsonify({
+            "sucesso": False,
+            "erro": "Uma atualização já está em andamento."
+        }), 409
+
+    except Exception:
+        current_app.logger.exception(
+            "Falha na atualização dos dados de gestantes"
+        )
+
+        return jsonify({
+            "sucesso": False,
+            "erro": "Falha na atualização. Consulte os logs do servidor."
+        }), 500

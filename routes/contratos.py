@@ -14,11 +14,13 @@ from flask import (
     session,
     redirect,
     url_for,
-    jsonify
+    jsonify,
+    current_app
 )
 
 from services.database import query_data, DATE_COLUMN
 from services.usuarios import obter_permissoes
+from services.etl import executar_etl_contratos, ETLJaEmExecucao
 
 
 contratos_bp = Blueprint("contratos", __name__)
@@ -218,3 +220,17 @@ def exportar():
         as_attachment=True,
         download_name=nome
     )
+
+
+# Acionado pelo botão Consultar registros antes da consulta ao PostgreSQL.
+@contratos_bp.post("/atualizar-dados")
+@permissao_contratos("visualizar")
+def atualizar_dados():
+    try:
+        executar_etl_contratos()
+    except ETLJaEmExecucao:
+        return jsonify({"erro": "Uma atualização já está em andamento. Aguarde."}), 409
+    except Exception:
+        current_app.logger.exception("Falha na atualização dos contratos")
+        return jsonify({"erro": "Não foi possível atualizar os dados. Consulte os logs do servidor."}), 500
+    return jsonify({"sucesso": True, "mensagem": "Dados atualizados com sucesso."})
