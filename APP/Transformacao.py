@@ -195,3 +195,4 @@ con_postgres.fechar_conexao()
 
 #Carregar os dados da tabela Gestantes no banco PostgreSQL
 con_postgres.load_dataframe(dfg, "Gestantes")
+con_postgres.fechar_conexao()
